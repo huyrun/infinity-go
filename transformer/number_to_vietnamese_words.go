@@ -10,18 +10,21 @@ func NumberToVietnameseWords(num int64) string {
 	}
 
 	s := strings.Builder{}
+	var n uint64
 
 	if num < 0 {
-		num = -num
-		s.WriteString("Âm ")
+		n = uint64(-(num + 1)) + 1
+		s.WriteString("âm ")
+	} else {
+		n = uint64(num)
 	}
 
-	s.WriteString(doNumberToVietnameseWords(num, true))
+	s.WriteString(doNumberToVietnameseWords(n, true))
 
 	return strings.TrimSpace(s.String())
 }
 
-func doNumberToVietnameseWords(num int64, rightMost bool) string {
+func doNumberToVietnameseWords(num uint64, rightMost bool) string {
 	if num < 10 {
 		return belowTen[num]
 	}
