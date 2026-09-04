@@ -1,12 +1,13 @@
 package transformer
 
 import (
+	"math"
 	"testing"
 
 	"github.com/stretchr/testify/require"
 )
 
-func TestNumberToWords(t *testing.T) {
+func TestNumberToVietnameseWords(t *testing.T) {
 	tests := []struct {
 		name string
 		num  int64
@@ -184,10 +185,11 @@ func TestNumberToWords(t *testing.T) {
 		{name: "100_000_000_000_000", num: 100_000_000_000_000, word: "một trăm nghìn tỷ"},
 		{name: "1_000_000_000_000_000", num: 1_000_000_000_000_000, word: "một triệu tỷ"},
 
-		{name: "9_223_372_036_854_775_807", num: 9_223_372_036_854_775_807, word: "chín tỷ tỷ hai trăm hai mươi ba triệu tỷ ba trăm bảy mươi hai nghìn tỷ không trăm ba mươi sáu tỷ tám trăm năm mươi bốn triệu bảy trăm bảy mươi lăm nghìn tám trăm linh bảy"},
+		{name: "9_223_372_036_854_775_807", num: math.MaxInt64, word: "chín tỷ tỷ hai trăm hai mươi ba triệu tỷ ba trăm bảy mươi hai nghìn tỷ không trăm ba mươi sáu tỷ tám trăm năm mươi bốn triệu bảy trăm bảy mươi lăm nghìn tám trăm linh bảy"},
 
+		{name: "-0", num: -0, word: "không"},
 		{name: "-1", num: -1, word: "âm một"},
-		{name: "-9_223_372_036_854_775_808", num: -9_223_372_036_854_775_808, word: "âm chín tỷ tỷ hai trăm hai mươi ba triệu tỷ ba trăm bảy mươi hai nghìn tỷ không trăm ba mươi sáu tỷ tám trăm năm mươi bốn triệu bảy trăm bảy mươi lăm nghìn tám trăm linh tám"},
+		{name: "-9_223_372_036_854_775_808", num: math.MinInt64, word: "âm chín tỷ tỷ hai trăm hai mươi ba triệu tỷ ba trăm bảy mươi hai nghìn tỷ không trăm ba mươi sáu tỷ tám trăm năm mươi bốn triệu bảy trăm bảy mươi lăm nghìn tám trăm linh tám"},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

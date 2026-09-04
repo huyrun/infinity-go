@@ -1,6 +1,8 @@
 package transformer
 
 import (
+	"math"
+	"slices"
 	"strings"
 )
 
@@ -20,7 +22,6 @@ func NumberToVietnameseWords(num int64) string {
 	}
 
 	s.WriteString(doNumberToVietnameseWords(n, true))
-
 	return strings.TrimSpace(s.String())
 }
 
@@ -51,238 +52,9 @@ func doNumberToVietnameseWords(num uint64, rightMost bool) string {
 		return strings.TrimSpace(belowHundred[tensPlaceNum] + " " + onesPlaceWords)
 	}
 
-	if num < 1_000 {
-		mod := num % 100
-		words := doNumberToVietnameseWords(mod, rightMost)
-		if len(words) > 0 {
-			if mod < 10 {
-				words = "linh " + words
-			}
-		}
-		return strings.TrimSpace(doNumberToVietnameseWords(num/100, false) + " trăm " + words)
-	}
-
-	if num < 1_000_000 {
-		mod := num % 1_000
-		words := doNumberToVietnameseWords(mod, rightMost)
-		if len(words) > 0 {
-			if mod < 10 {
-				return strings.TrimSpace(doNumberToVietnameseWords(num/1_000, false) + " nghìn không trăm linh " + words)
-			}
-			if mod < 100 {
-				return strings.TrimSpace(doNumberToVietnameseWords(num/1_000, false) + " nghìn không trăm " + words)
-			}
-		}
-		return strings.TrimSpace(doNumberToVietnameseWords(num/1_000, false) + " nghìn " + words)
-	}
-
-	if num < 1_000_000_000 {
-		mod := num % 1_000_000
-		words := doNumberToVietnameseWords(mod, rightMost)
-		if len(words) > 0 {
-			if mod < 10 {
-				return strings.TrimSpace(doNumberToVietnameseWords(num/1_000_000, false) + " triệu không trăm linh " + words)
-			}
-			if mod < 100 {
-				return strings.TrimSpace(doNumberToVietnameseWords(num/1_000_000, false) + " triệu không trăm " + words)
-			}
-			if mod < 1_000 {
-				return strings.TrimSpace(doNumberToVietnameseWords(num/1_000_000, false) + " triệu " + words)
-			}
-			if mod < 10_000 {
-				return strings.TrimSpace(doNumberToVietnameseWords(num/1_000_000, false) + " triệu không trăm linh " + words)
-			}
-			if mod < 100_000 {
-				return strings.TrimSpace(doNumberToVietnameseWords(num/1_000_000, false) + " triệu không trăm " + words)
-			}
-		}
-		return strings.TrimSpace(doNumberToVietnameseWords(num/1_000_000, false) + " triệu " + words)
-	}
-
-	if num < 1_000_000_000_000 {
-		mod := num % 1_000_000_000
-		words := doNumberToVietnameseWords(mod, rightMost)
-		if len(words) > 0 {
-			if mod < 10 {
-				return strings.TrimSpace(doNumberToVietnameseWords(num/1_000_000_000, false) + " tỷ không trăm linh " + words)
-			}
-			if mod < 100 {
-				return strings.TrimSpace(doNumberToVietnameseWords(num/1_000_000_000, false) + " tỷ không trăm " + words)
-			}
-			if mod < 1_000 {
-				return strings.TrimSpace(doNumberToVietnameseWords(num/1_000_000_000, false) + " tỷ " + words)
-			}
-			if mod < 10_000 {
-				return strings.TrimSpace(doNumberToVietnameseWords(num/1_000_000_000, false) + " tỷ không trăm linh " + words)
-			}
-			if mod < 100_000 {
-				return strings.TrimSpace(doNumberToVietnameseWords(num/1_000_000_000, false) + " tỷ không trăm " + words)
-			}
-			if mod < 1_000_000 {
-				return strings.TrimSpace(doNumberToVietnameseWords(num/1_000_000_000, false) + " tỷ " + words)
-			}
-			if mod < 10_000_000 {
-				return strings.TrimSpace(doNumberToVietnameseWords(num/1_000_000_000, false) + " tỷ không trăm linh " + words)
-			}
-			if mod < 100_000_000 {
-				return strings.TrimSpace(doNumberToVietnameseWords(num/1_000_000_000, false) + " tỷ không trăm " + words)
-			}
-		}
-
-		return strings.TrimSpace(doNumberToVietnameseWords(num/1_000_000_000, false) + " tỷ " + words)
-	}
-
-	if num < 1_000_000_000_000_000 {
-		mod := num % 1_000_000_000_000
-		words := doNumberToVietnameseWords(mod, rightMost)
-		if len(words) > 0 {
-			if mod < 10 {
-				return strings.TrimSpace(doNumberToVietnameseWords(num/1_000_000_000_000, false) + " nghìn tỷ không trăm linh " + words)
-			}
-			if mod < 100 {
-				return strings.TrimSpace(doNumberToVietnameseWords(num/1_000_000_000_000, false) + " nghìn tỷ không trăm " + words)
-			}
-			if mod < 1_000 {
-				return strings.TrimSpace(doNumberToVietnameseWords(num/1_000_000_000_000, false) + " nghìn tỷ " + words)
-			}
-			if mod < 10_000 {
-				return strings.TrimSpace(doNumberToVietnameseWords(num/1_000_000_000_000, false) + " nghìn tỷ không trăm linh " + words)
-			}
-			if mod < 100_000 {
-				return strings.TrimSpace(doNumberToVietnameseWords(num/1_000_000_000_000, false) + " nghìn tỷ không trăm " + words)
-			}
-			if mod < 1_000_000 {
-				return strings.TrimSpace(doNumberToVietnameseWords(num/1_000_000_000_000, false) + " nghìn tỷ " + words)
-			}
-			if mod < 10_000_000 {
-				return strings.TrimSpace(doNumberToVietnameseWords(num/1_000_000_000_000, false) + " nghìn tỷ không trăm linh " + words)
-			}
-			if mod < 100_000_000 {
-				return strings.TrimSpace(doNumberToVietnameseWords(num/1_000_000_000_000, false) + " nghìn tỷ không trăm " + words)
-			}
-			if mod < 1_000_000_000 {
-				return strings.TrimSpace(doNumberToVietnameseWords(num/1_000_000_000_000, false) + " nghìn tỷ " + words)
-			}
-			if mod < 10_000_000_000 {
-				return strings.TrimSpace(doNumberToVietnameseWords(num/1_000_000_000_000, false) + " nghìn tỷ không trăm linh " + words)
-			}
-			if mod < 100_000_000_000 {
-				return strings.TrimSpace(doNumberToVietnameseWords(num/1_000_000_000_000, false) + " nghìn tỷ không trăm " + words)
-			}
-		}
-
-		return strings.TrimSpace(doNumberToVietnameseWords(num/1_000_000_000_000, false) + " nghìn tỷ " + words)
-	}
-
-	if num < 1_000_000_000_000_000_000 {
-		mod := num % 1_000_000_000_000_000
-		words := doNumberToVietnameseWords(mod, rightMost)
-		if len(words) > 0 {
-			if mod < 10 {
-				return strings.TrimSpace(doNumberToVietnameseWords(num/1_000_000_000_000_000, false) + " triệu tỷ không trăm linh " + words)
-			}
-			if mod < 100 {
-				return strings.TrimSpace(doNumberToVietnameseWords(num/1_000_000_000_000_000, false) + " triệu tỷ không trăm " + words)
-			}
-			if mod < 1_000 {
-				return strings.TrimSpace(doNumberToVietnameseWords(num/1_000_000_000_000_000, false) + " triệu tỷ " + words)
-			}
-			if mod < 10_000 {
-				return strings.TrimSpace(doNumberToVietnameseWords(num/1_000_000_000_000_000, false) + " triệu tỷ không trăm linh " + words)
-			}
-			if mod < 100_000 {
-				return strings.TrimSpace(doNumberToVietnameseWords(num/1_000_000_000_000_000, false) + " triệu tỷ không trăm " + words)
-			}
-			if mod < 1_000_000 {
-				return strings.TrimSpace(doNumberToVietnameseWords(num/1_000_000_000_000_000, false) + " triệu tỷ " + words)
-			}
-			if mod < 10_000_000 {
-				return strings.TrimSpace(doNumberToVietnameseWords(num/1_000_000_000_000_000, false) + " triệu tỷ không trăm linh " + words)
-			}
-			if mod < 100_000_000 {
-				return strings.TrimSpace(doNumberToVietnameseWords(num/1_000_000_000_000_000, false) + " triệu tỷ không trăm " + words)
-			}
-			if mod < 1_000_000_000 {
-				return strings.TrimSpace(doNumberToVietnameseWords(num/1_000_000_000_000_000, false) + " triệu tỷ " + words)
-			}
-			if mod < 10_000_000_000 {
-				return strings.TrimSpace(doNumberToVietnameseWords(num/1_000_000_000_000_000, false) + " triệu tỷ không trăm linh " + words)
-			}
-			if mod < 100_000_000_000 {
-				return strings.TrimSpace(doNumberToVietnameseWords(num/1_000_000_000_000_000, false) + " triệu tỷ không trăm " + words)
-			}
-			if mod < 1_000_000_000_000 {
-				return strings.TrimSpace(doNumberToVietnameseWords(num/1_000_000_000_000_000, false) + " triệu tỷ " + words)
-			}
-			if mod < 10_000_000_000_000 {
-				return strings.TrimSpace(doNumberToVietnameseWords(num/1_000_000_000_000_000, false) + " triệu tỷ không trăm linh " + words)
-			}
-			if mod < 100_000_000_000_000 {
-				return strings.TrimSpace(doNumberToVietnameseWords(num/1_000_000_000_000_000, false) + " triệu tỷ không trăm " + words)
-			}
-		}
-
-		return strings.TrimSpace(doNumberToVietnameseWords(num/1_000_000_000_000_000, false) + " triệu tỷ " + words)
-	}
-
-	// num >= 1_000_000_000_000_000_000_000
-	mod := num % 1_000_000_000_000_000_000
-	words := doNumberToVietnameseWords(mod, rightMost)
-	if len(words) > 0 {
-		if mod < 10 {
-			return strings.TrimSpace(doNumberToVietnameseWords(num/1_000_000_000_000_000_000, false) + " tỷ tỷ không trăm linh " + words)
-		}
-		if mod < 100 {
-			return strings.TrimSpace(doNumberToVietnameseWords(num/1_000_000_000_000_000_000, false) + " tỷ tỷ không trăm " + words)
-		}
-		if mod < 1_000 {
-			return strings.TrimSpace(doNumberToVietnameseWords(num/1_000_000_000_000_000_000, false) + " tỷ tỷ " + words)
-		}
-		if mod < 10_000 {
-			return strings.TrimSpace(doNumberToVietnameseWords(num/1_000_000_000_000_000_000, false) + " tỷ tỷ không trăm linh " + words)
-		}
-		if mod < 100_000 {
-			return strings.TrimSpace(doNumberToVietnameseWords(num/1_000_000_000_000_000_000, false) + " tỷ tỷ không trăm " + words)
-		}
-		if mod < 1_000_000 {
-			return strings.TrimSpace(doNumberToVietnameseWords(num/1_000_000_000_000_000_000, false) + " tỷ tỷ " + words)
-		}
-		if mod < 10_000_000 {
-			return strings.TrimSpace(doNumberToVietnameseWords(num/1_000_000_000_000_000_000, false) + " tỷ tỷ không trăm linh " + words)
-		}
-		if mod < 100_000_000 {
-			return strings.TrimSpace(doNumberToVietnameseWords(num/1_000_000_000_000_000, false) + " tỷ tỷ không trăm " + words)
-		}
-		if mod < 1_000_000_000 {
-			return strings.TrimSpace(doNumberToVietnameseWords(num/1_000_000_000_000_000_000, false) + " tỷ tỷ " + words)
-		}
-		if mod < 10_000_000_000 {
-			return strings.TrimSpace(doNumberToVietnameseWords(num/1_000_000_000_000_000_000, false) + " tỷ tỷ không trăm linh " + words)
-		}
-		if mod < 100_000_000_000 {
-			return strings.TrimSpace(doNumberToVietnameseWords(num/1_000_000_000_000_000_000, false) + " tỷ tỷ không trăm " + words)
-		}
-		if mod < 1_000_000_000_000 {
-			return strings.TrimSpace(doNumberToVietnameseWords(num/1_000_000_000_000_000_000, false) + " tỷ tỷ " + words)
-		}
-		if mod < 10_000_000_000_000 {
-			return strings.TrimSpace(doNumberToVietnameseWords(num/1_000_000_000_000_000_000, false) + " tỷ tỷ không trăm linh " + words)
-		}
-		if mod < 100_000_000_000_000 {
-			return strings.TrimSpace(doNumberToVietnameseWords(num/1_000_000_000_000_000_000, false) + " tỷ tỷ không trăm " + words)
-		}
-		if mod < 1_000_000_000_000_000 {
-			return strings.TrimSpace(doNumberToVietnameseWords(num/1_000_000_000_000_000_000, false) + " tỷ tỷ " + words)
-		}
-		if mod < 10_000_000_000_000_000 {
-			return strings.TrimSpace(doNumberToVietnameseWords(num/1_000_000_000_000_000_000, false) + " tỷ tỷ không trăm linh " + words)
-		}
-		if mod < 100_000_000_000_000_000 {
-			return strings.TrimSpace(doNumberToVietnameseWords(num/1_000_000_000_000_000_000, false) + " tỷ tỷ không trăm " + words)
-		}
-	}
-
-	return strings.TrimSpace(doNumberToVietnameseWords(num/1_000_000_000_000_000_000, false) + " tỷ tỷ " + words)
+	quotient, remainder := divideNum(num)
+	words := doNumberToVietnameseWords(remainder, rightMost)
+	return joinWords(doNumberToVietnameseWords(quotient, false), getMiddleWords(num, remainder), words)
 }
 
 var irregular = map[string]string{
@@ -296,3 +68,69 @@ var belowTen = []string{"", "một", "hai", "ba", "bốn", "năm", "sáu", "bả
 var belowTwenty = []string{"mười", "mười một", "mười hai", "mười ba", "mười bốn", "mười lăm", "mười sáu", "mười bảy", "mười tám", "mười chín"}
 
 var belowHundred = []string{"", "mười", "hai mươi", "ba mươi", "bốn mươi", "năm mươi", "sáu mươi", "bảy mươi", "tám mươi", "chín mươi"}
+
+var numberUnit = []string{
+	"", "", "",
+	"trăm",
+	"nghìn", "nghìn", "nghìn",
+	"triệu", "triệu", "triệu",
+	"tỷ", "tỷ", "tỷ",
+	"nghìn tỷ", "nghìn tỷ", "nghìn tỷ",
+	"triệu tỷ", "triệu tỷ", "triệu tỷ",
+	"tỷ tỷ", "tỷ tỷ", "tỷ tỷ",
+}
+
+var middleWordsMap = []string{"", "không trăm linh", "không trăm"}
+
+func getMiddleWords(num, remainder uint64) string {
+	if num < 1_000 {
+		var middleWords string
+		if remainder < 10 && remainder > 0 {
+			middleWords = "linh"
+		}
+		return joinWords("trăm", middleWords)
+	}
+
+	var countNumDigits int
+	for num > 0 {
+		num = num / 10
+		countNumDigits++
+	}
+
+	var countRemainderDigits int
+	for remainder > 0 {
+		remainder = remainder / 10
+		countRemainderDigits++
+	}
+	return joinWords(numberUnit[countNumDigits], middleWordsMap[countRemainderDigits%3])
+}
+
+func divideNum(num uint64) (uint64, uint64) {
+	if num < 1_000 {
+		return num / 100, num % 100
+	}
+
+	var countNumDigits int
+	temp := num
+	for temp > 0 {
+		temp = temp / 10
+		countNumDigits++
+	}
+
+	group := countNumDigits / 3
+	if countNumDigits%3 == 0 {
+		group--
+	}
+	m := uint64(math.Pow10(group * 3))
+
+	return num / m, num % m
+}
+
+func joinWords(words ...string) string {
+	return strings.TrimSpace(strings.Join(
+		slices.DeleteFunc(words, func(s string) bool {
+			return s == ""
+		}),
+		" ",
+	))
+}
