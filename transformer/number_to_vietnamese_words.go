@@ -11,18 +11,17 @@ func NumberToVietnameseWords(num int64) string {
 		return "không"
 	}
 
-	s := strings.Builder{}
+	var negative string
 	var n uint64
 
 	if num < 0 {
 		n = uint64(-(num + 1)) + 1
-		s.WriteString("âm ")
+		negative = "âm"
 	} else {
 		n = uint64(num)
 	}
 
-	s.WriteString(doNumberToVietnameseWords(n, true))
-	return strings.TrimSpace(s.String())
+	return joinWords(negative, doNumberToVietnameseWords(n, true))
 }
 
 func doNumberToVietnameseWords(num uint64, rightMost bool) string {
@@ -49,12 +48,12 @@ func doNumberToVietnameseWords(num uint64, rightMost bool) string {
 			onesPlaceWords = irregular[onesPlaceWords]
 		}
 
-		return strings.TrimSpace(belowHundred[tensPlaceNum] + " " + onesPlaceWords)
+		return joinWords(belowHundred[tensPlaceNum], onesPlaceWords)
 	}
 
 	quotient, remainder := divideNum(num)
-	words := doNumberToVietnameseWords(remainder, rightMost)
-	return joinWords(doNumberToVietnameseWords(quotient, false), getMiddleWords(num, remainder), words)
+
+	return joinWords(doNumberToVietnameseWords(quotient, false), getMiddleWords(num, remainder), doNumberToVietnameseWords(remainder, rightMost))
 }
 
 var irregular = map[string]string{
@@ -80,7 +79,7 @@ var numberUnit = []string{
 	"tỷ tỷ", "tỷ tỷ", "tỷ tỷ",
 }
 
-var middleWordsMap = []string{"", "không trăm linh", "không trăm"}
+var linkingWordsMap = []string{"", "không trăm linh", "không trăm"}
 
 func getMiddleWords(num, remainder uint64) string {
 	if num < 1_000 {
@@ -102,7 +101,8 @@ func getMiddleWords(num, remainder uint64) string {
 		remainder = remainder / 10
 		countRemainderDigits++
 	}
-	return joinWords(numberUnit[countNumDigits], middleWordsMap[countRemainderDigits%3])
+
+	return joinWords(numberUnit[countNumDigits], linkingWordsMap[countRemainderDigits%3])
 }
 
 func divideNum(num uint64) (uint64, uint64) {
