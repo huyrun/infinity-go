@@ -6,6 +6,31 @@ import (
 	"strings"
 )
 
+var belowTenIrregular = map[string]string{
+	"một": "mốt",
+	"bốn": "tư",
+	"năm": "lăm",
+}
+
+var belowTen = []string{"", "một", "hai", "ba", "bốn", "năm", "sáu", "bảy", "tám", "chín"}
+
+var belowTwenty = []string{"mười", "mười một", "mười hai", "mười ba", "mười bốn", "mười lăm", "mười sáu", "mười bảy", "mười tám", "mười chín"}
+
+var belowHundred = []string{"", "mười", "hai mươi", "ba mươi", "bốn mươi", "năm mươi", "sáu mươi", "bảy mươi", "tám mươi", "chín mươi"}
+
+var numberUnit = []string{
+	"", "", "",
+	"trăm",
+	"nghìn", "nghìn", "nghìn",
+	"triệu", "triệu", "triệu",
+	"tỷ", "tỷ", "tỷ",
+	"nghìn tỷ", "nghìn tỷ", "nghìn tỷ",
+	"triệu tỷ", "triệu tỷ", "triệu tỷ",
+	"tỷ tỷ", "tỷ tỷ", "tỷ tỷ",
+}
+
+var linkingWords = []string{"", "không trăm linh", "không trăm"}
+
 func NumberToVietnameseWords(num int64) string {
 	if num == 0 {
 		return "không"
@@ -33,61 +58,34 @@ func doNumberToVietnameseWords(num uint64, rightMost bool) string {
 		return belowTwenty[num-10]
 	}
 
-	if num < 100 {
-		onesPlaceNum := num % 10
-		tensPlaceNum := num / 10
-		onesPlaceWords := doNumberToVietnameseWords(onesPlaceNum, rightMost)
-
-		if onesPlaceNum == 1 && tensPlaceNum > 1 {
-			onesPlaceWords = irregular[onesPlaceWords]
-		}
-		if rightMost && onesPlaceNum == 4 && tensPlaceNum > 1 {
-			onesPlaceWords = irregular[onesPlaceWords]
-		}
-		if onesPlaceNum == 5 && tensPlaceNum > 0 {
-			onesPlaceWords = irregular[onesPlaceWords]
-		}
-
-		return joinWords(belowHundred[tensPlaceNum], onesPlaceWords)
-	}
-
 	quotient, remainder := divideNum(num)
 
-	return joinWords(doNumberToVietnameseWords(quotient, false), getMiddleWords(num, remainder), doNumberToVietnameseWords(remainder, rightMost))
-}
+	if num < 100 {
+		onesPlaceWords := doNumberToVietnameseWords(remainder, rightMost)
 
-var irregular = map[string]string{
-	"một": "mốt",
-	"bốn": "tư",
-	"năm": "lăm",
-}
-
-var belowTen = []string{"", "một", "hai", "ba", "bốn", "năm", "sáu", "bảy", "tám", "chín"}
-
-var belowTwenty = []string{"mười", "mười một", "mười hai", "mười ba", "mười bốn", "mười lăm", "mười sáu", "mười bảy", "mười tám", "mười chín"}
-
-var belowHundred = []string{"", "mười", "hai mươi", "ba mươi", "bốn mươi", "năm mươi", "sáu mươi", "bảy mươi", "tám mươi", "chín mươi"}
-
-var numberUnit = []string{
-	"", "", "",
-	"trăm",
-	"nghìn", "nghìn", "nghìn",
-	"triệu", "triệu", "triệu",
-	"tỷ", "tỷ", "tỷ",
-	"nghìn tỷ", "nghìn tỷ", "nghìn tỷ",
-	"triệu tỷ", "triệu tỷ", "triệu tỷ",
-	"tỷ tỷ", "tỷ tỷ", "tỷ tỷ",
-}
-
-var linkingWordsMap = []string{"", "không trăm linh", "không trăm"}
-
-func getMiddleWords(num, remainder uint64) string {
-	if num < 1_000 {
-		var middleWords string
-		if remainder < 10 && remainder > 0 {
-			middleWords = "linh"
+		if remainder == 1 && quotient > 1 {
+			onesPlaceWords = belowTenIrregular[onesPlaceWords]
 		}
-		return joinWords("trăm", middleWords)
+		if rightMost && remainder == 4 && quotient > 1 {
+			onesPlaceWords = belowTenIrregular[onesPlaceWords]
+		}
+		if remainder == 5 && quotient > 0 {
+			onesPlaceWords = belowTenIrregular[onesPlaceWords]
+		}
+
+		return joinWords(belowHundred[quotient], onesPlaceWords)
+	}
+
+	return joinWords(doNumberToVietnameseWords(quotient, false), middleWords(num, remainder), doNumberToVietnameseWords(remainder, rightMost))
+}
+
+func middleWords(num, remainder uint64) string {
+	if num < 1_000 {
+		var words string
+		if remainder < 10 && remainder > 0 {
+			words = "linh"
+		}
+		return joinWords("trăm", words)
 	}
 
 	var countNumDigits int
@@ -102,10 +100,14 @@ func getMiddleWords(num, remainder uint64) string {
 		countRemainderDigits++
 	}
 
-	return joinWords(numberUnit[countNumDigits], linkingWordsMap[countRemainderDigits%3])
+	return joinWords(numberUnit[countNumDigits], linkingWords[countRemainderDigits%3])
 }
 
 func divideNum(num uint64) (uint64, uint64) {
+	if num < 100 {
+		return num / 10, num % 10
+	}
+
 	if num < 1_000 {
 		return num / 100, num % 100
 	}
