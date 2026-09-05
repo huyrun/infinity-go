@@ -1,7 +1,6 @@
 package transformer
 
 import (
-	"math"
 	"slices"
 	"strings"
 )
@@ -30,6 +29,16 @@ var numberUnit = []string{
 }
 
 var linkingWords = []string{"", "không trăm linh", "không trăm"}
+
+var thousandPowers = []uint64{
+	1,
+	1_000,
+	1_000_000,
+	1_000_000_000,
+	1_000_000_000_000,
+	1_000_000_000_000_000,
+	1_000_000_000_000_000_000,
+}
 
 func NumberToVietnameseWords(num int64) string {
 	if num == 0 {
@@ -123,9 +132,8 @@ func divideNum(num uint64) (uint64, uint64) {
 	if countNumDigits%3 == 0 {
 		group--
 	}
-	m := uint64(math.Pow10(group * 3))
 
-	return num / m, num % m
+	return num / thousandPowers[group], num % thousandPowers[group]
 }
 
 func joinWords(words ...string) string {
