@@ -17,7 +17,7 @@ var belowTwenty = []string{"mười", "mười một", "mười hai", "mười b
 
 var belowHundred = []string{"", "mười", "hai mươi", "ba mươi", "bốn mươi", "năm mươi", "sáu mươi", "bảy mươi", "tám mươi", "chín mươi"}
 
-var numberUnit = []string{
+var units = []string{
 	"", "", "",
 	"trăm",
 	"nghìn", "nghìn", "nghìn",
@@ -27,8 +27,6 @@ var numberUnit = []string{
 	"triệu tỷ", "triệu tỷ", "triệu tỷ",
 	"tỷ tỷ", "tỷ tỷ", "tỷ tỷ",
 }
-
-var linkingWords = []string{"", "không trăm linh", "không trăm"}
 
 var thousandPowers = []uint64{
 	1,
@@ -67,7 +65,7 @@ func doNumberToVietnameseWords(num uint64, rightMost bool) string {
 		return belowTwenty[num-10]
 	}
 
-	quotient, remainder := divideNum(num)
+	quotient, remainder, countNumDigits, countRemainderDigits, zeroPadding := divideNum(num)
 
 	if num < 100 {
 		onesPlaceWords := doNumberToVietnameseWords(remainder, rightMost)
@@ -85,55 +83,67 @@ func doNumberToVietnameseWords(num uint64, rightMost bool) string {
 		return joinWords(belowHundred[quotient], onesPlaceWords)
 	}
 
-	return joinWords(doNumberToVietnameseWords(quotient, false), middleWords(num, remainder), doNumberToVietnameseWords(remainder, rightMost))
+	return joinWords(doNumberToVietnameseWords(quotient, false), scaleUnit(countNumDigits), linkingWords(countNumDigits, countRemainderDigits, zeroPadding), doNumberToVietnameseWords(remainder, rightMost))
 }
 
-func middleWords(num, remainder uint64) string {
-	if num < 1_000 {
-		var words string
-		if remainder < 10 && remainder > 0 {
-			words = "linh"
+func divideNum(num uint64) (quotient uint64, remainder uint64, countNumDigits int, countRemainderDigits, zeroPadding int) {
+	countNumDigits = countDigits(num)
+
+	if num < 100 {
+		quotient = num / 10
+		remainder = num % 10
+	} else if num < 1_000 {
+		quotient = num / 100
+		remainder = num % 100
+	} else {
+		group := countNumDigits / 3
+		if countNumDigits%3 == 0 {
+			group--
 		}
-		return joinWords("trăm", words)
+
+		quotient = num / thousandPowers[group]
+		remainder = num % thousandPowers[group]
 	}
 
-	var countNumDigits int
+	if remainder == 0 {
+		return quotient, remainder, countNumDigits, 0, 0
+	}
+
+	countRemainderDigits = countDigits(remainder)
+	zeroPadding = ((countRemainderDigits+2)/3)*3 - countRemainderDigits
+	return
+}
+
+func countDigits(num uint64) int {
+	var count int
 	for num > 0 {
 		num = num / 10
-		countNumDigits++
+		count++
 	}
 
-	var countRemainderDigits int
-	for remainder > 0 {
-		remainder = remainder / 10
-		countRemainderDigits++
-	}
-
-	return joinWords(numberUnit[countNumDigits], linkingWords[countRemainderDigits%3])
+	return count
 }
 
-func divideNum(num uint64) (uint64, uint64) {
-	if num < 100 {
-		return num / 10, num % 10
+func scaleUnit(countNumDigits int) string {
+	return units[countNumDigits]
+}
+
+func linkingWords(countNumDigits, countRemainderDigits, zeroPadding int) string {
+	if countNumDigits <= 3 {
+		if countRemainderDigits == 1 {
+			return "linh"
+		}
+		return ""
 	}
 
-	if num < 1_000 {
-		return num / 100, num % 100
+	switch zeroPadding {
+	case 1:
+		return "không trăm"
+	case 2:
+		return "không trăm linh"
+	default:
+		return ""
 	}
-
-	var countNumDigits int
-	temp := num
-	for temp > 0 {
-		temp = temp / 10
-		countNumDigits++
-	}
-
-	group := countNumDigits / 3
-	if countNumDigits%3 == 0 {
-		group--
-	}
-
-	return num / thousandPowers[group], num % thousandPowers[group]
 }
 
 func joinWords(words ...string) string {
