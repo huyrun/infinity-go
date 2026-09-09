@@ -5,104 +5,100 @@ import (
 	"strings"
 )
 
-func NumberToVietnameseWords(num int64) string {
-	if num == 0 {
+func NumberToVietnameseWords(number int64) string {
+	if number == 0 {
 		return "không"
 	}
 
-	var negative string
-	var n uint64
+	var sign string
+	var num uint64
 
-	if num < 0 {
-		n = uint64(-(num + 1)) + 1
-		negative = "âm"
+	if number < 0 {
+		num = uint64(-(number + 1)) + 1
+		sign = "âm"
 	} else {
-		n = uint64(num)
+		num = uint64(number)
 	}
 
-	return joinWords(negative, doNumberToVietnameseWords(n, countDigits(n), true))
+	return joinWords(sign, doNumberToVietnameseWords(num, countDigits(num), true))
 }
 
-func doNumberToVietnameseWords(num uint64, countNumDigits int, rightMost bool) string {
-	if num < 10 {
-		return belowTen[num]
+func doNumberToVietnameseWords(number uint64, numDigits int, rightMost bool) string {
+	if number < 10 {
+		return belowTen[number]
 	}
 
-	if num < 20 {
-		return belowTwenty[num-10]
+	if number < 20 {
+		return belowTwenty[number-10]
 	}
 
-	leftPart, rightPart, countLeftPartDigits, countRightPartDigits, zeroPadding := decomposeNumber(num, countNumDigits)
+	left, right, leftDigits, rightDigits, zeroPadding := decomposeNumber(number, numDigits)
 
-	if num < 100 {
-		onesPlaceWords := doNumberToVietnameseWords(rightPart, countRightPartDigits, rightMost)
+	if number < 100 {
+		onesPlaceWords := belowTen[right]
 
-		if rightPart == 1 && leftPart > 1 {
-			onesPlaceWords = belowTenIrregular[onesPlaceWords]
+		if right == 1 && left > 1 {
+			onesPlaceWords = belowTenIrregular[right]
 		}
-		if rightMost && rightPart == 4 && leftPart > 1 {
-			onesPlaceWords = belowTenIrregular[onesPlaceWords]
+		if rightMost && right == 4 && left > 1 {
+			onesPlaceWords = belowTenIrregular[right]
 		}
-		if rightPart == 5 && leftPart > 0 {
-			onesPlaceWords = belowTenIrregular[onesPlaceWords]
+		if right == 5 && left > 0 {
+			onesPlaceWords = belowTenIrregular[right]
 		}
 
-		return joinWords(belowHundred[leftPart], onesPlaceWords)
+		return joinWords(belowHundred[left], onesPlaceWords)
 	}
 
 	return joinWords(
-		doNumberToVietnameseWords(leftPart, countLeftPartDigits, false),
-		scaleUnit(countNumDigits),
-		linkingWords(countNumDigits, countRightPartDigits, zeroPadding),
-		doNumberToVietnameseWords(rightPart, countRightPartDigits, rightMost),
+		doNumberToVietnameseWords(left, leftDigits, false),
+		scaleUnit(numDigits),
+		linkingWords(numDigits, rightDigits, zeroPadding),
+		doNumberToVietnameseWords(right, rightDigits, rightMost),
 	)
 }
 
-func decomposeNumber(num uint64, countNumDigits int) (leftPart uint64, rightPart uint64, countLeftPartDigits, countRightPartDigits, zeroPadding int) {
-	if num < 100 {
-		leftPart = num / 10
-		rightPart = num % 10
-	} else if num < 1_000 {
-		leftPart = num / 100
-		rightPart = num % 100
+func decomposeNumber(number uint64, numDigits int) (left uint64, right uint64, leftDigits, rightDigits, zeroPadding int) {
+	if number < 100 {
+		left = number / 10
+		right = number % 10
+	} else if number < 1_000 {
+		left = number / 100
+		right = number % 100
 	} else {
-		group := countNumDigits / 3
-		if countNumDigits%3 == 0 {
-			group--
-		}
-
-		leftPart = num / thousandPowers[group]
-		rightPart = num % thousandPowers[group]
+		group := (numDigits - 1) / 3
+		left = number / thousandPowers[group]
+		right = number % thousandPowers[group]
 	}
 
-	countLeftPartDigits = countDigits(leftPart)
+	leftDigits = countDigits(left)
 
-	if rightPart == 0 {
-		return leftPart, rightPart, countLeftPartDigits, 0, 0
+	if right == 0 {
+		return left, right, leftDigits, 0, 0
 	}
 
-	countRightPartDigits = countDigits(rightPart)
-	zeroPadding = ((countRightPartDigits+2)/3)*3 - countRightPartDigits
+	rightDigits = countDigits(right)
+	zeroPadding = ((rightDigits+2)/3)*3 - rightDigits
 	return
 }
 
-func countDigits(num uint64) int {
+func countDigits(number uint64) int {
 	var count int
-	for num > 0 {
-		num = num / 10
+	for number > 0 {
+		number = number / 10
 		count++
 	}
 
 	return count
 }
 
-func scaleUnit(countNumDigits int) string {
-	return units[((countNumDigits + 2) / 3)]
+func scaleUnit(numDigits int) string {
+	return units[((numDigits + 2) / 3)]
 }
 
-func linkingWords(countNumDigits, countRemainderDigits, zeroPadding int) string {
-	if countNumDigits <= 3 {
-		if countRemainderDigits == 1 {
+func linkingWords(numDigits, rightDigits, zeroPadding int) string {
+	if numDigits <= 3 {
+		if rightDigits == 1 {
 			return "lẻ"
 		}
 		return ""
@@ -119,21 +115,12 @@ func linkingWords(countNumDigits, countRemainderDigits, zeroPadding int) string 
 }
 
 func joinWords(words ...string) string {
-	return strings.TrimSpace(strings.Join(
-		slices.DeleteFunc(words, func(s string) bool {
-			return s == ""
-		}),
-		" ",
-	))
-}
-
-var belowTenIrregular = map[string]string{
-	"một": "mốt",
-	"bốn": "tư",
-	"năm": "lăm",
+	return strings.Join(slices.DeleteFunc(words, func(s string) bool { return s == "" }), " ")
 }
 
 var belowTen = []string{"", "một", "hai", "ba", "bốn", "năm", "sáu", "bảy", "tám", "chín"}
+
+var belowTenIrregular = []string{"", "mốt", "hai", "ba", "tư", "lăm", "sáu", "bảy", "tám", "chín"}
 
 var belowTwenty = []string{"mười", "mười một", "mười hai", "mười ba", "mười bốn", "mười lăm", "mười sáu", "mười bảy", "mười tám", "mười chín"}
 
