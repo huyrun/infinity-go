@@ -35,19 +35,11 @@ func doNumberToVietnameseWords(number uint64, numDigits int, rightMost bool) str
 	left, right, leftDigits, rightDigits, zeroPadding := decomposeNumber(number, numDigits)
 
 	if number < 100 {
-		onesPlaceWords := belowTen[right]
-
-		if right == 1 && left > 1 {
-			onesPlaceWords = belowTenIrregular[right]
+		if (right == 1 && left > 1) || (rightMost && right == 4 && left > 1) || (right == 5 && left > 0) {
+			return joinWords(belowHundred[left], belowTenIrregular[right])
 		}
-		if rightMost && right == 4 && left > 1 {
-			onesPlaceWords = belowTenIrregular[right]
-		}
-		if right == 5 && left > 0 {
-			onesPlaceWords = belowTenIrregular[right]
-		}
-
-		return joinWords(belowHundred[left], onesPlaceWords)
+		
+		return joinWords(belowHundred[left], belowTen[right])
 	}
 
 	return joinWords(
